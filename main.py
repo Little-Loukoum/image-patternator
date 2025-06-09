@@ -51,7 +51,7 @@ def black_columns(ctx, i, j, square_size, avg):
 def white_diagonal_cross(ctx, i, j, square_size, avg):
 	c = square_size*sqrt(1-avg)
 	d = (square_size - c)/2
-	demi = hsq * scale
+	demi = square_size/2
 
 	x0, y0, x1, y1 = i*square_size, j*square_size, (i+1)*square_size, (j+1)*square_size
 
@@ -63,7 +63,7 @@ def white_diagonal_cross(ctx, i, j, square_size, avg):
 def white_vertical_cross(ctx, i, j, square_size, avg):
 	c = square_size*sqrt(1-avg)
 	d = (square_size - c)/2
-	demi = hsq * scale
+	demi = square_size/2
 	x0, y0 = i*square_size, j*square_size
 	box = [(i*square_size, j*square_size), ((i+1)*square_size, (j+1)*square_size)]
 
