@@ -54,12 +54,31 @@ def scale_and_save(image, size, name = 'pattern.jpg'):
 	image.save(name)
 
 if __name__ == "__main__":
+	print("LittleLoukoum's patternator")
 
 	cwd = getcwd()
 	script_dir = path.dirname(path.realpath(__file__))
-	image_paths = [path.abspath(cwd), path.abspath(path.join(cwd, 'images')), path.abspath(script_dir), path.abspath(path.join(script_dir, 'images'))]
+	image_paths = [path.abspath(cwd), path.abspath(path.join(cwd, 'images'))]
+	if not path.samefile(cwd, script_dir):
+		image_paths += [path.abspath(script_dir), path.abspath(path.join(script_dir, 'images'))]
 
-	print("LittleLoukoum's patternator")
+	try:
+		with open('paths.txt', 'r') as f:
+			custom_dirs = f.read().split()
+			print(custom_dirs)
+			for c_dir in custom_dirs:
+				c_dir = path.abspath(c_dir)
+				print(c_dir)
+				if not (path.exists(c_dir) and path.isdir(c_dir)):
+					print(path.exists(c_dir), path.isdir(c_dir))
+					print("Warning : some or all custom image directories in paths.txt may be incorrect.")
+					continue
+				if all(map(lambda y: not path.samefile(c_dir, y), image_paths)):
+					image_paths.append(c_dir)
+	except FileNotFoundError:
+		pass
+
+	print(image_paths)
 	print("Enter image name on the next line.")
 	correct = False
 	while not correct:

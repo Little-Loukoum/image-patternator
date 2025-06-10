@@ -1,2 +1,6 @@
 images/*
 !images/baiser_de_l'hotel.jpg
+results/*
+!results/baiser_lines.jpg
+__pycache__
+__pycache__/*:
