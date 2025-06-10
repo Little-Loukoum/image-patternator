@@ -1,108 +1,7 @@
 #!/usr/bin/env python
-from PIL import Image, ImageDraw
-from math import sqrt, pi, log
-from random import randrange
-import sys
-
-def black_ring(ctx, i, j, square_size, avg, adjusted = True):
-	r = square_size*sqrt(avg)/2
-	if adjusted:
-		r *= pi/4
-	d = square_size/2 - r
-	box = [(i*square_size, j*square_size), ((i+1)*square_size, (j+1)*square_size)]
-	small = [(i*square_size+d, j*square_size+d), ((i+1)*square_size-d, (j+1)*square_size-d)]
-
-	ctx.ellipse(box, fill=0)
-	ctx.ellipse(small, fill=255)
-
-def black_circle(ctx, i, j, square_size, avg):
-	r = square_size*sqrt(1-avg)/2
-	d = square_size/2 - r
-	small = [(i*square_size+d, j*square_size+d), ((i+1)*square_size-d, (j+1)*square_size-d)]
-	ctx.ellipse(small, fill=0)
-
-def black_square(ctx, i, j, square_size, avg):
-	c = square_size*sqrt(1-avg)
-	d = (square_size - c)/2
-	small = [(i*square_size+d, j*square_size+d), ((i+1)*square_size-d, (j+1)*square_size-d)]
-	ctx.rectangle(small, 0)
-
-def black_square_ring(ctx, i, j, square_size, avg):
-	c = square_size*sqrt(avg)
-	d = (square_size - c)/2
-	box = [(i*square_size, j*square_size), ((i+1)*square_size, (j+1)*square_size)]
-	small = [(i*square_size+d, j*square_size+d), ((i+1)*square_size-d, (j+1)*square_size-d)]
-	ctx.rectangle(box,0)
-	ctx.rectangle(small, 255)
-
-def black_lines(ctx, i, j, square_size, avg):
-	c = square_size*(1-avg)
-	d = (square_size - c)/2
-	small = [(i*square_size, j*square_size+d), ((i+1)*square_size, (j+1)*square_size-d)]
-	ctx.rectangle(small, 0)
-
-def black_columns(ctx, i, j, square_size, avg):
-	c = square_size*(1-avg)
-	d = (square_size - c)/2
-	small = [(i*square_size+d, j*square_size), ((i+1)*square_size-d, (j+1)*square_size)]
-	ctx.rectangle(small, 0)
-
-
-def white_diagonal_cross(ctx, i, j, square_size, avg):
-	c = square_size*sqrt(1-avg)
-	d = (square_size - c)/2
-	demi = square_size/2
-
-	x0, y0, x1, y1 = i*square_size, j*square_size, (i+1)*square_size, (j+1)*square_size
-
-	ctx.polygon([(x0+d, y0), (x1-d, y0), (x0+demi, y0+demi)], 0)
-	ctx.polygon([(x0, y0+d), (x0, y1-d), (x0+demi-d, y0+demi)], 0)
-	ctx.polygon([(x0+d, y1), (x1-d, y1), (x0+demi, y1-demi+d)], 0)
-	ctx.polygon([(x1, y0+d), (x1, y1-d), (x1-demi+d, y0+demi)], 0)
-
-def white_vertical_cross(ctx, i, j, square_size, avg):
-	c = square_size*sqrt(1-avg)
-	d = (square_size - c)/2
-	demi = square_size/2
-	x0, y0 = i*square_size, j*square_size
-	box = [(i*square_size, j*square_size), ((i+1)*square_size, (j+1)*square_size)]
-
-	ctx.rectangle(box, 0)
-	ctx.rectangle((x0+demi-d, y0, x0+demi+d, y0+square_size), 255)
-	ctx.rectangle((x0, y0+demi-d, x0+square_size, y0+demi+d), 255)
-
-def black_crosshatch(ctx, i, j, square_size, avg, chaotic = False, adjusted = True):
-	if adjusted:
-		avg = log(avg+1, 2)
-	n = round(square_size*(1-avg))
-	if chaotic:
-		d = 1/sqrt(1-avg)
-	else:
-		d = square_size/n if n != 0 else square_size/2
-	x0, y0 = i*square_size, j*square_size
-	for it in range(n-1):
-		ctx.line([(x0+it*d+d, y0), (x0+it*d+d, y0+square_size)], 0, 1)
-		ctx.line([(x0, y0+it*d+d), (x0+square_size, y0+it*d+d)], 0, 1)
-
-def black_stipples(ctx, i, j, square_size, avg):
-	n = round((1-avg) * (square_size)**2 / 4)
-	x0, y0 = i*square_size, j*square_size
-	for _ in range(n):
-		x, y = x0+randrange(square_size), y0+randrange(square_size)
-		ctx.ellipse( [(x-1, y-1), (x+1, y+1)], 0)
-
-patterns = {
-	"Rings": black_ring,
-	"Discs": black_circle,
-	"Squares": black_square,
-	"Square rings": black_square_ring,
-	"Horizontal lines": black_lines,
-	"Vertical lines": black_columns,
-	"Xs": white_diagonal_cross,
-	"Plus": white_vertical_cross,
-	"Crosshatch": black_crosshatch,
-	"Stippling": black_stipples
-}
+import os.path as path, sys
+from os import getcwd
+from tiles import *
 
 def grid(image, size, square_size, abyss):
 	avgs = []
@@ -155,22 +54,26 @@ def scale_and_save(image, size, name = 'pattern.jpg'):
 	image.save(name)
 
 if __name__ == "__main__":
-	try:
-		im = Image.open(sys.argv[1])
-	except:
-		im = Image.open("bisou.jpeg")
+
+	cwd = getcwd()
+	script_dir = path.dirname(path.realpath(__file__))
+	image_paths = [path.abspath(cwd), path.abspath(path.join(cwd, 'images')), path.abspath(script_dir), path.abspath(path.join(script_dir, 'images'))]
 
 	print("LittleLoukoum's patternator")
 	print("Enter image name on the next line.")
 	correct = False
 	while not correct:
 		filename = input('> ')
-		try:
-			image = Image.open(filename)
-		except FileNotFoundError:
+		for image_dir in image_paths:
+			try:
+				image = Image.open(path.join(image_dir,filename))
+			except FileNotFoundError:
+				continue
+			else:
+				correct = True
+				break
+		if not correct:
 			print('Oops, we can\'t find that image. Did you move it to the same folder? If yes, check the spelling and enter correct name:')
-		else:
-			correct = True
 
 	colour = False
 
@@ -187,6 +90,7 @@ if __name__ == "__main__":
 				correct = True
 			elif choice == 2:
 				colour = True
+				image = image.convert('RGB')
 				print("Colour has been kept. You will choose a pattern for each channel.")
 				correct = True
 			else:
@@ -257,8 +161,10 @@ if __name__ == "__main__":
 	while not correct:
 		out_name = input("> ")
 		try:
-			scale_and_save(result, image.size, out_name)
-		except:
+			result_dir = path.join(script_dir, 'results')
+			scale_and_save(result, image.size, path.join(result_dir, out_name))
+		except BaseException as e:
+			print(e)
 			print("Something went wrong. Please try again. The name should look something like this: cool_pattern.jpg")
 		else:
 			correct = True
