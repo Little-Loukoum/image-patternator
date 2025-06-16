@@ -1,5 +1,5 @@
 # image-patternator
-A short python program for tiling effects on images
+A short python program for tiling images with halftone-like effects.
 
 ## Usage
 Run the main python file from a terminal. On Windows, this may require to have downloaded the python executable.
